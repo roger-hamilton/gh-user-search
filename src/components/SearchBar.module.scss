@@ -1,3 +1,7 @@
 .searchInput {
-  @apply border w-full p-2 focus:border-blue-600 focus:ring-1 outline-none;
+  @apply border rounded w-full p-2 focus:ring-blue-500 focus:ring-2 outline-none;
+}
+
+.loading {
+  @apply absolute right-7 top-0 h-full transition-opacity flex justify-center items-center text-gray-500;
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 
 const isAxiosError = (err: any): err is AxiosError => err.isAxiosError;
@@ -20,8 +20,25 @@ export interface GHUser {
   repos_url: string
   events_url: string
   received_events_url: string
-  type: string
+  type: 'User'
   site_admin: boolean
+}
+
+export interface GHUserDetails extends GHUser {
+  name: string
+  company: string
+  blog: string
+  location: string
+  email: string
+  hireable: boolean
+  bio: string
+  twitter_username: string
+  public_repos: number
+  public_gists: number
+  followers: number
+  following: number
+  created_at: string
+  updated_at: string
 }
 
 export interface GHSearchSuccess<T> {
@@ -154,46 +171,52 @@ export const searchAllPages = <T>(
 
 
 export const useGitHubUserSearch = () => {
+
+  const usersRef = useRef<GHUser[]>([]);
+
   const [users, setUsers] = useState<GHUser[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [runningSearch, setRunningSearch] = useState<ReturnType<typeof searchAllPages>>({
+  const runningSearch = useRef<ReturnType<typeof searchAllPages>>({
     searchId: 0,
     cancel: () => {},
   });
 
-  const search = async (query: string) => {
+  const search = async (query: string, maxPages: number = 1) => {
     // cancel the last search
-    runningSearch.cancel();
+    runningSearch.current.cancel();
+    setLoading(true);
 
     // start new paginated search
     const newSearch = searchAllPages(
-      searchPagedUsers(query),
+      searchPagedUsers(query, 100),
       (data, page) => {
-        console.log(`got page: ${page} users: ${data.length}`);
         if (page === 1) {
           // on first page overwrite any data that is already there
-          setUsers(data);
+          usersRef.current = data;
         } else {
           // on subsequent pages append to current user list
-          setUsers([...users, ...data]);
+          usersRef.current = [...usersRef.current, ...data];
         }
+        setUsers(usersRef.current);
       },
-      () => {
-        if (newSearch.searchId === runningSearch.searchId) {
+      (searchId) => {
+        if (searchId === runningSearch.current.searchId) {
           // only cancel loading state if this was the most current search
           setLoading(false);
         }
-      }
+      },
+      maxPages,
     );
-    
+
     // set this search as the current one
-    setRunningSearch(newSearch);
+    runningSearch.current = newSearch;
   }
 
   return {
     users,
     loading,
-    search
+    search,
+    clear: () => setUsers([]),
   }
 }
