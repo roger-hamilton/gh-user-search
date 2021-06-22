@@ -9,7 +9,9 @@ name: Deploy to Firebase Hosting on merge
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    environment: production
+    env:
+      VITE_CLIENT_ID: f01d32de91314d1e35aa
+      VITE_REDIRECT_URI: https://gh-user-search-35481.web.app/auth-callback
     steps:
       - uses: actions/checkout@v2
       - run: npm ci && npm run build
