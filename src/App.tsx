@@ -37,7 +37,7 @@ const App = () => {
 
   const hasMore = total - users.length > 0;
 
-  const [showModal, setShowModal] = useState(!user);
+  const [showModal, setShowModal] = useState(!token && !user);
 
   const handleLogout = () => {
     logout();
