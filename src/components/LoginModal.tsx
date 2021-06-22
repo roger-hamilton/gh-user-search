@@ -25,13 +25,13 @@ const LoginModal: FC<LoginModalProps> = ({ isOpen, onClose, login }) => (
           </p>
           <div className="flex justify-between py-2">
             <button
-              className="rounded font-bold px-2 py-1 bg-gray-800 text-white hover:bg-blue-400 transition"
+              className="rounded font-bold px-2 py-1 bg-gray-800 text-white hover:bg-blue-400 transition focus:outline-none focus:bg-blue-400"
               onClick={login}
             >
               <GitHubIcon className="inline-block mr-1" /> Login
             </button>
             <button
-              className="rounded px-2 py-1 border hover:bg-yellow-200 transition"
+              className="rounded px-2 py-1 border hover:bg-yellow-200 transition focus:outline-none focus:bg-yellow-200"
               onClick={onClose}
             >
               Continue Without Logging In
