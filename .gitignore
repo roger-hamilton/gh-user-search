@@ -6,3 +6,4 @@ dist-ssr
 
 .env
 .firebase
+firebase-debug.log
