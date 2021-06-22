@@ -80,7 +80,7 @@ const usersReducer = (state: UserState, action: UserSearchAction) => {
   }
 };
 
-const USERS_PER_PAGE = 20
+const USERS_PER_PAGE = 20;
 
 export const useUserSearch = (token: string | null) => {
   const [usersState, dispatch] = useReducer(usersReducer, inialUsersState);

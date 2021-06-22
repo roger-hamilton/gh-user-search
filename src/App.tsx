@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useCallback } from 'react';
+import React, { ChangeEventHandler, useCallback, useState } from 'react';
 import classes from './App.module.scss';
 import { useUserSearch } from './hooks/userSearch';
 import SearchBar from './components/SearchBar';
@@ -8,6 +8,7 @@ import InfinteScroll from 'react-infinite-scroll-component';
 import cn from 'classnames';
 import { ArrowDownIcon } from '@heroicons/react/outline';
 import CurrentUser from './components/CurrentUser';
+import LoginModal from './components/LoginModal';
 
 const App = () => {
 
@@ -15,7 +16,8 @@ const App = () => {
     user,
     token,
     error,
-    logout
+    logout,
+    login,
   } = useGitHubAuth();
 
   const {
@@ -35,9 +37,20 @@ const App = () => {
 
   const hasMore = total - users.length > 0;
 
+  const [showModal, setShowModal] = useState(!user);
+
+  const handleLogout = () => {
+    logout();
+  }
+
+  const handleLogin = () => {
+    setShowModal(true);
+  }
+
   return (
     <div className={cn(classes.App, 'h-screen flex flex-col overflow-hidden')}>
       <TokenContext.Provider value={token}>
+        <LoginModal isOpen={showModal} onClose={() => setShowModal(false)} login={login} />
         <div className="flex flex-row">
           <SearchBar
             onSearch={handleSearch}
@@ -46,7 +59,7 @@ const App = () => {
             loading={loading}
             minimumChars={1}
           />
-          <CurrentUser user={user} logout={logout} />
+          <CurrentUser user={user} logout={handleLogout} login={handleLogin} />
         </div>
         <div id="infinite-scroller" className="flex-1 overflow-auto mt-2" >
           <InfinteScroll

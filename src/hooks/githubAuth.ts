@@ -41,6 +41,18 @@ export const useAuthToken = () => {
   return token;
 }
 
+const parseHash = () => location.hash
+  .slice(1) // remove leading '#'
+  .split('&')
+  .map(p => p.split('='))
+  .reduce(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: value,
+    }),
+    {} as Record<string, string>
+  );
+
 export const useGitHubAuth = () => {
   const [token, setToken] = useState(initialToken);
   const [user, setUser] = useState<GHUserDetails | null>(null);
@@ -50,35 +62,36 @@ export const useGitHubAuth = () => {
   useEffect(() => {
     (async () => {
       let currentToken = token;
-      console.log({ currentToken })
+
       // check if we have access token in hash
       if (location.hash.length) {
-        
-        const hash = location.hash.slice(1).split('&').map(p => p.split('=')).reduce((acc, [key, value]) => ({
-          ...acc,
-          [key]: value,
-        }), {} as Record<string, string>);
-        if (hash.access_token) {
-          
-          setToken(hash.access_token);
-          localStorage.setItem(TOKEN_KEY, hash.access_token);
+        const hash = parseHash();
 
-          currentToken = hash.access_token;
+        if (hash.access_token) {
+          if (localStorage.getItem(STATE_KEY) === hash.state) {
+
+            setToken(hash.access_token);
+            localStorage.setItem(TOKEN_KEY, hash.access_token);
+  
+            currentToken = hash.access_token;
+          } else {
+            setError('State values do not match');
+          }
           // clear token from url
           location.hash = '';
         }
       }
       if (!currentToken) {
-        // initalize github login flow
-        const state = uuid();
-        localStorage.setItem(STATE_KEY, state);
+        // // initalize github login flow
+        // const state = uuid();
+        // localStorage.setItem(STATE_KEY, state);
 
-        const lastLogin = localStorage.getItem(LAST_LOGIN_KEY);
+        // const lastLogin = localStorage.getItem(LAST_LOGIN_KEY);
   
-        // send the user to github login flow
-        location.href = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${state}&login=${lastLogin ?? ''}&allow_signup=false`;
+        // // send the user to github login flow
+        // location.href = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${state}&login=${lastLogin ?? ''}&allow_signup=false`;
 
-        // nothing else can happen now until login flow is complete 
+        // nothing else can happen now until login flow is complete
         return;
       }
 
@@ -94,13 +107,27 @@ export const useGitHubAuth = () => {
     })();
   }, [token]);
 
+  
+
   return {
     token,
     user,
     error,
     logout: () => {
       setToken(null);
-      localStorage.setItem(LAST_LOGIN_KEY, '');
+      localStorage.removeItem(TOKEN_KEY);
+      setUser(null);
+      localStorage.removeItem(LAST_LOGIN_KEY);
+    },
+    login: () => {
+      // initalize github login flow
+      const state = uuid();
+      localStorage.setItem(STATE_KEY, state);
+
+      const lastLogin = localStorage.getItem(LAST_LOGIN_KEY);
+
+      // send the user to github login flow
+      location.href = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${state}&login=${lastLogin ?? ''}&allow_signup=false`;
     }
   }
 }

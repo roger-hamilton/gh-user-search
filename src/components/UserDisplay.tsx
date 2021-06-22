@@ -32,6 +32,7 @@ const UserDisplay: FC<{ user: GHUser }> = ({ user }) => {
           <div className="ml-5 flex flex-col flex-1 cursor-default">
             <a
               href={userDetails?.html_url}
+              target="_blank"
               className={cn(classes.textExist, "font-bold text-lg")}
               data-tip="view profile"
             >
@@ -99,7 +100,7 @@ const UserDisplay: FC<{ user: GHUser }> = ({ user }) => {
               {
                 userDetails?.public_repos !== undefined
                   ? <a
-                    href={userDetails.repos_url}
+                    href={`${userDetails.html_url}?tab=repositories`}
                     target="_blank"
                     className={cn(classes.textExist, "group-hover:text-indigo-600")}
                   >

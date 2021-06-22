@@ -35,7 +35,7 @@ async function createServer() {
 
     const { access_token } = tokenRes.data;
 
-    res.redirect(`/#access_token=${access_token}`);
+    res.redirect(`/#access_token=${access_token}&state=${state}`);
   });
 
   // use vite's connect instance as middleware

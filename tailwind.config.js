@@ -12,6 +12,7 @@ module.exports = {
       zIndex: ['hover', 'active'],
       borderWidth: ['hover', 'focus'],
       height: ['hover', 'focus'],
+      ringWidth: ['hover', 'focus', 'focus-within']
     },
   },
   plugins: [],
