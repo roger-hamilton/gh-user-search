@@ -123,7 +123,7 @@ export const useUserSearch = (token: string | null) => {
     // return promise that resolves when search resolves;
 
     await newSearch;
-  }, [pending, setPending, setLoading, dispatch, token]);
+  }, [pending, token]);
 
   const nextPage = useCallback(async () => {
     console.log('nextPage', usersState);
@@ -154,11 +154,11 @@ export const useUserSearch = (token: string | null) => {
     setPending(next);
 
     await next;
-  }, [usersState, setPending, setLoading, loading, dispatch, token]);
+  }, [usersState, loading, token]);
 
   const clear = useCallback(() => {
     dispatch({ type: 'clear' });
-  }, [dispatch]);
+  }, []);
 
   return {
     ...usersState,

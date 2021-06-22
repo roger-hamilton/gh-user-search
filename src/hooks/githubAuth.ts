@@ -1,6 +1,5 @@
 import { GHUserDetails, ghClient } from '../githubApiClient';
-import axios from "axios";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { v4 as uuid } from 'uuid';
 
 
@@ -59,39 +58,45 @@ const parseHash = () => location.hash
     {} as Record<string, string>
   );
 
+
+
 export const useGitHubAuth = () => {
   const [token, setToken] = useState(initialToken);
+
   const [user, setUser] = useState<GHUserDetails | null>(null);
 
   const [state, setState] = useState<LoginState>(LoginState.Unknown);
 
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      let currentToken = token;
-
-      // check if we have access token in hash
-      if (location.hash.length) {
-        const hash = parseHash();
-
-        if (hash.access_token) {
-          if (localStorage.getItem(STATE_KEY) === hash.state) {
-
-            setToken(hash.access_token);
-            localStorage.setItem(TOKEN_KEY, hash.access_token);
+  const processHash = useCallback(() => {
+    // check if we have access token in hash
+    if (location.hash.length) {
+      const hash = parseHash();
+      // clear token from url
+      location.hash = '';
   
-            currentToken = hash.access_token;
-          } else {
-            setError('State values do not match');
-          }
-          // clear token from url
-          location.hash = '';
+      if (hash.access_token) {
+        if (localStorage.getItem(STATE_KEY) === hash.state) {
+  
+          setToken(hash.access_token);
+          localStorage.setItem(TOKEN_KEY, hash.access_token);
+  
+          return hash.access_token;
+        } else {
+          setError('State values do not match');
         }
       }
+    }
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const currentToken = processHash() ?? token;
+
       if (!currentToken) {
         setState(LoginState.NotLoggedIn);
-        // nothing else can happen now until login flow is complete
+        // nothing else can happen now until the users logs in
         return;
       }
 
@@ -100,37 +105,33 @@ export const useGitHubAuth = () => {
       if (!currentUser) {
         setToken(null);
         setError(`Couldn't get user from access token`);
+        setState(LoginState.NotLoggedIn);
       } else {
         localStorage.setItem(LAST_LOGIN_KEY, currentUser.login);
+        setState(LoginState.LoggedIn);
       }
       setUser(currentUser);
-      setState(LoginState.LoggedIn);
     })();
   }, [token]);
 
-  
-
-  return {
-    token,
-    user,
-    error,
-    state,
-    logout: () => {
-      setToken(null);
+  const logout = useCallback(() => {
+    setToken(null);
       localStorage.removeItem(TOKEN_KEY);
       setUser(null);
       localStorage.removeItem(LAST_LOGIN_KEY);
       setState(LoginState.NotLoggedIn);
-    },
-    login: () => {
-      // initalize github login flow
-      const state = uuid();
-      localStorage.setItem(STATE_KEY, state);
+  }, [])
 
-      const lastLogin = localStorage.getItem(LAST_LOGIN_KEY);
+  const login = useCallback(() => {
+    // initalize github login flow
+    const state = uuid();
+    localStorage.setItem(STATE_KEY, state);
 
-      // send the user to github login flow
-      location.href = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${state}&login=${lastLogin ?? ''}&allow_signup=false`;
-    }
-  }
+    const lastLogin = localStorage.getItem(LAST_LOGIN_KEY);
+
+    // send the user to github login flow
+    location.href = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${state}&login=${lastLogin ?? ''}&allow_signup=false`;
+  }, []);
+
+  return { token, user, error, state, logout, login }
 }
