@@ -1,17 +1,9 @@
 import * as functions from "firebase-functions";
 import axios from "axios";
 
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
 export const authCallback =
   functions.https.onRequest(async (request, response) => {
-    const {code} = request.query;
+    const {code, state} = request.query;
 
     if (typeof code === "string") {
       const tokenRes = await axios.post("https://github.com/login/oauth/access_token", {
@@ -25,7 +17,7 @@ export const authCallback =
 
       const {access_token: accessToken} = tokenRes.data;
 
-      response.redirect(`/#access_token=${accessToken}`);
+      response.redirect(`/#access_token=${accessToken}&state=${state}`);
     }
 
     response.status(400).json({message: "no code sent in the response"});
