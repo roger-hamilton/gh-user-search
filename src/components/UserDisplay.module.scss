@@ -1,6 +1,6 @@
 .userDisplay {
   @apply
-    flex flex-col group relative
+    flex flex-col relative
     p-2 m-1
     border border-gray-200 bg-white
     transform transition
@@ -13,6 +13,6 @@
   }
 
   .icon {
-    @apply h-4 w-4 mr-2 relative -top-1 inline-block transition group-hover:text-white;
+    @apply h-4 w-4 mr-2 relative -top-1 inline-block transition;
   }
 }
