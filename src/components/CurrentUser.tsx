@@ -67,7 +67,7 @@ const CurrentUser: FC<{ user: GHUserDetails | null, logout: () => void, login: (
       {({ open }) => (
         <>
           <div>
-            <Menu.Button as="button" className="h-10 w-10 rounded-full ring-0 focus:ring hover:ring overflow-hidden focus:outline-none">
+            <Menu.Button as="button" className="h-10 w-10 rounded-full ring-0 focus:ring hover:ring overflow-hidden focus:outline-none" name={user ? 'Current User' : 'Login'}>
               {user
                 ? <img className="" src={user?.avatar_url} />
                 : <GitHubIcon height="40" width="40" />
