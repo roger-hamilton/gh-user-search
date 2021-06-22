@@ -72,7 +72,6 @@ interface SearchUsersRequest {
 }
 
 export const searchUsers = async ({ query, page = 0, per_page = 30, token }: SearchUsersRequest) => {
-  console.log({ token });
   const res = await ghClient.get<GHSearchResult<GHUser>>('/search/users', {
     params: {
       q: `${query} in:email ${query} in:name`,

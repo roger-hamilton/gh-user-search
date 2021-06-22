@@ -126,7 +126,6 @@ export const useUserSearch = (token: string | null) => {
   }, [pending, token]);
 
   const nextPage = useCallback(async () => {
-    console.log('nextPage', usersState);
     await pending;
     const next = cancellablePromise(async isCancelled => {
       try {
