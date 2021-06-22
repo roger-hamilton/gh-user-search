@@ -1,9 +1,9 @@
-import React, { ChangeEventHandler, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useEffect, useState } from 'react';
 import classes from './App.module.scss';
 import { useUserSearch } from './hooks/userSearch';
 import SearchBar from './components/SearchBar';
 import UserDisplay from './components/UserDisplay';
-import { TokenContext, useGitHubAuth } from './hooks/githubAuth';
+import { LoginState, TokenContext, useGitHubAuth } from './hooks/githubAuth';
 import InfinteScroll from 'react-infinite-scroll-component';
 import cn from 'classnames';
 import { ArrowDownIcon } from '@heroicons/react/outline';
@@ -18,6 +18,7 @@ const App = () => {
     error,
     logout,
     login,
+    state,
   } = useGitHubAuth();
 
   const {
@@ -37,7 +38,13 @@ const App = () => {
 
   const hasMore = total - users.length > 0;
 
-  const [showModal, setShowModal] = useState(!token && !user);
+  useEffect(() => {
+    if (state === LoginState.NotLoggedIn) {
+      setShowModal(true);
+    }
+  }, [state])
+
+  const [showModal, setShowModal] = useState(state === LoginState.NotLoggedIn);
 
   const handleLogout = () => {
     logout();

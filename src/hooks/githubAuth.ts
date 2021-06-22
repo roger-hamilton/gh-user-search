@@ -20,6 +20,12 @@ if (!localStorage.getItem(STATE_KEY)) {
 export const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
 export const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
 
+export enum LoginState {
+  NotLoggedIn = 'NOT_LOGGED_IN',
+  LoggedIn = 'LOGGED_IN',
+  Unknown = 'UNKNOWN' // could be logging in
+}
+
 const getCurrentUser = async (access_token: string) => {
   try {
     const res = await ghClient.get<GHUserDetails>('/user', {
@@ -57,6 +63,8 @@ export const useGitHubAuth = () => {
   const [token, setToken] = useState(initialToken);
   const [user, setUser] = useState<GHUserDetails | null>(null);
 
+  const [state, setState] = useState<LoginState>(LoginState.Unknown);
+
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -82,15 +90,7 @@ export const useGitHubAuth = () => {
         }
       }
       if (!currentToken) {
-        // // initalize github login flow
-        // const state = uuid();
-        // localStorage.setItem(STATE_KEY, state);
-
-        // const lastLogin = localStorage.getItem(LAST_LOGIN_KEY);
-  
-        // // send the user to github login flow
-        // location.href = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${state}&login=${lastLogin ?? ''}&allow_signup=false`;
-
+        setState(LoginState.NotLoggedIn);
         // nothing else can happen now until login flow is complete
         return;
       }
@@ -103,7 +103,8 @@ export const useGitHubAuth = () => {
       } else {
         localStorage.setItem(LAST_LOGIN_KEY, currentUser.login);
       }
-      setUser(currentUser)
+      setUser(currentUser);
+      setState(LoginState.LoggedIn);
     })();
   }, [token]);
 
@@ -113,11 +114,13 @@ export const useGitHubAuth = () => {
     token,
     user,
     error,
+    state,
     logout: () => {
       setToken(null);
       localStorage.removeItem(TOKEN_KEY);
       setUser(null);
       localStorage.removeItem(LAST_LOGIN_KEY);
+      setState(LoginState.NotLoggedIn);
     },
     login: () => {
       // initalize github login flow
