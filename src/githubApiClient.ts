@@ -64,7 +64,6 @@ export type GHSearchResult<T> =
 
 export const isSearchError = (res: GHSearchResult<any>): res is GHSearchError => 'error' in res;
 
-
 interface SearchUsersRequest {
   query: string
   page?: number

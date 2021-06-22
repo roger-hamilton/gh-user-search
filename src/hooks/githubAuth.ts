@@ -2,7 +2,6 @@ import { GHUserDetails, ghClient } from '../githubApiClient';
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import { v4 as uuid } from 'uuid';
-// import { Octokit } from 'octokit'
 
 
 export const TOKEN_KEY = 'github_token';
